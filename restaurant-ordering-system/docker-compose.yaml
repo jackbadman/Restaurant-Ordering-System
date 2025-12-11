@@ -1,14 +1,4 @@
 services:
-
-  mongo:
-    image: mongo
-    container_name: mongo-db
-    restart: always
-    ports:
-      - "27018:27017"
-    volumes:
-      - mongo-data:/data/db
-
   backend:
     build: ./backend
     container_name: restaurant-backend
@@ -17,8 +7,6 @@ services:
       - "5001:5000"
     env_file:
       - ./backend/.env
-    depends_on:
-      - mongo
 
   frontend:
     build: ./frontend
@@ -28,6 +16,3 @@ services:
       - "5173:5173"
     depends_on:
       - backend
-
-volumes:
-  mongo-data:
