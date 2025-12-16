@@ -1,12 +1,19 @@
+import { useState } from 'react'
 import './App.css'
-
-import homeImage from './assets/KebabHome.svg'
-import logo from './assets/logo.svg'
+import Header from './components/Header.jsx'
+import categories from './data/categories.js'
+import Home from './pages/Home.jsx'
+import Menu from './pages/Menu.jsx'
+import Category from './pages/Category.jsx'
+import Login from './pages/Login.jsx'
+import Signup from './pages/Signup.jsx'
 
 function App() {
+  const [view, setView] = useState('home')
+  const [activeCategory, setActiveCategory] = useState(null)
+
   const handleLogin = () => {
-    // Placeholder for authentication flow
-    console.log('Navigate to login')
+    setView('login')
   }
 
   const handleBasket = () => {
@@ -14,50 +21,70 @@ function App() {
     console.log('Open basket')
   }
 
+  const handleLoginSubmit = (event) => {
+    event.preventDefault()
+    // Placeholder for authentication flow
+    console.log('Submit login')
+  }
+
+  const handleSignupSubmit = (event) => {
+    event.preventDefault()
+    // Placeholder for registration flow
+    console.log('Submit signup')
+  }
+
+  const handleBackHome = () => {
+    setView('home')
+  }
+
+  const goToSignup = () => {
+    setView('signup')
+  }
+
+  const goToMenu = () => {
+    setActiveCategory(null)
+    setView('menu')
+  }
+
+  const openCategory = (categoryId) => {
+    const category = categories.find((cat) => cat.id === categoryId)
+    if (category) {
+      setActiveCategory(category)
+      setView('category')
+    }
+  }
+
   return (
     <div className="page">
-      <header className="top-bar">
-        <div className="brand">
-          <img src={logo} alt="Restaurant logo" className="brand__logo" />
-          <span className="brand__name">King Kebab</span>
-        </div>
-        <div className="actions">
-          <button className="action-button" type="button" onClick={handleLogin}>
-            Login
-          </button>
-          <button
-            className="icon-button"
-            type="button"
-            aria-label="Basket"
-            onClick={handleBasket}
-          >
-            🧺
-          </button>
-        </div>
-      </header>
+      <Header onLogin={handleLogin} onBasket={handleBasket} />
 
-      <main className="kebab">
-        <div className="home__image">
-          <img src={homeImage} alt="Restaurant dish" />
-        </div>
-        <div className="home__content">
-          <p className="eyebrow">Home</p>
-          <h1>Enjoy quick ordering from the comfort of your home</h1>
-          <p className="description">
-            Browse the latest menu, customise your meal, and keep an eye on your order in
-            one place. Start your next order with just a few taps.
-          </p>
-        </div>
-      </main>
+      {view === 'login' && (
+        <Login onSubmit={handleLoginSubmit} onSignup={goToSignup} onBack={handleBackHome} />
+      )}
 
-      <nav className="cta-row" aria-label="Primary">
-        <a className="nav-button" href="/menu">
-          View Menu
-        </a>
-        <a className="nav-button nav-button--secondary" href="/order">
-          Go to Ordering
-        </a>
-      </nav>
+      {view === 'signup' && (
+        <Signup
+          onSubmit={handleSignupSubmit}
+          onBackLogin={() => setView('login')}
+          onBackHome={handleBackHome}
+        />
+      )}
+
+      {view === 'menu' && (
+        <Menu categories={categories} onSelectCategory={openCategory} onBackHome={handleBackHome} />
+      )}
+
+      {view === 'category' && activeCategory && (
+        <Category
+          category={activeCategory}
+          onBackCategories={() => setView('menu')}
+          onBackHome={handleBackHome}
+        />
+      )}
+
+      {view === 'home' && (
+        <Home onMenu={goToMenu} />
+      )}
     </div>
   )
 }
