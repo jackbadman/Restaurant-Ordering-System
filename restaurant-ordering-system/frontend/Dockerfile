@@ -9,6 +9,7 @@ COPY . .
 
 RUN npm run build
 
-EXPOSE 5173
+EXPOSE 4173
 
-CMD ["npm", "run", "preview"]
+# Bind to 0.0.0.0 so the host can reach the preview server and keep it on port 4173
+CMD ["npm", "run", "preview", "--", "--host", "--port", "4173"]
