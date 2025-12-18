@@ -6,6 +6,7 @@ import Menu from './pages/Menu.jsx'
 import Category from './pages/Category.jsx'
 import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
+import Orders from './pages/Orders.jsx'
 import useAuthForm from './hooks/useAuthForm.js'
 import useMenu from './hooks/useMenu.js'
 
@@ -41,6 +42,10 @@ function App() {
     setView('menu')
   }
 
+  const goToOrders = () => {
+    setView('orders')
+  }
+
   const goToLogin = () => {
     clearSignupStatus()
     setView('login')
@@ -56,7 +61,7 @@ function App() {
 
   return (
     <div className="page">
-      <Header onLogin={handleLogin} onBasket={handleBasket} />
+      <Header onLogin={handleLogin} onBasket={handleBasket} onOrders={goToOrders} />
 
       {view === 'login' && (
         <Login
@@ -95,7 +100,11 @@ function App() {
       )}
 
       {view === 'home' && (
-        <Home onMenu={goToMenu} />
+        <Home onMenu={goToMenu} onOrders={goToOrders} />
+      )}
+
+      {view === 'orders' && (
+        <Orders onBackHome={handleBackHome} />
       )}
     </div>
   )

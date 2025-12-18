@@ -1,6 +1,6 @@
 import logo from '../assets/logo.svg'
 
-function Header({ onLogin, onBasket }) {
+function Header({ onLogin, onBasket, onOrders }) {
   return (
     <header className="top-bar">
       <div className="brand">
@@ -11,6 +11,11 @@ function Header({ onLogin, onBasket }) {
         <button className="action-button" type="button" onClick={onLogin}>
           Login
         </button>
+        {onOrders && (
+          <button className="action-button" type="button" onClick={onOrders}>
+            Orders
+          </button>
+        )}
         <button className="icon-button" type="button" aria-label="Basket" onClick={onBasket}>
           🧺
         </button>

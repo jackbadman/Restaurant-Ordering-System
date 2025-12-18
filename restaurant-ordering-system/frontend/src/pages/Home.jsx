@@ -1,6 +1,6 @@
 import homeImage from '../assets/KebabHome1.svg'
 
-function Home({ onMenu }) {
+function Home({ onMenu, onOrders }) {
   return (
     <>
       <main className="hero">
@@ -21,9 +21,9 @@ function Home({ onMenu }) {
         <button className="nav-button" type="button" onClick={onMenu}>
           View Menu
         </button>
-        <a className="nav-button nav-button--secondary" href="/order">
+        <button className="nav-button nav-button--secondary" type="button" onClick={onOrders}>
           Go to Ordering
-        </a>
+        </button>
       </nav>
     </>
   )

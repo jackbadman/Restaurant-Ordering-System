@@ -34,3 +34,41 @@ export const getOrder = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const getOrdersForUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      return res.status(400).json({ message: "User id is required" });
+    }
+
+    const orders = await Order.find({ userId }).sort({ createdAt: -1 });
+    if (orders.length === 0) {
+      return res.json({ orders: [] });
+    }
+
+    const orderIds = orders.map((order) => order._id);
+    const items = await OrderItem.find({ orderId: { $in: orderIds } }).populate(
+      "menuItemId"
+    );
+
+    const itemsByOrderId = new Map();
+    items.forEach((item) => {
+      const key = item.orderId.toString();
+      if (!itemsByOrderId.has(key)) {
+        itemsByOrderId.set(key, []);
+      }
+      itemsByOrderId.get(key).push(item);
+    });
+
+    const payload = orders.map((order) => ({
+      ...order.toObject(),
+      items: itemsByOrderId.get(order._id.toString()) || []
+    }));
+
+    res.json({ orders: payload });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
