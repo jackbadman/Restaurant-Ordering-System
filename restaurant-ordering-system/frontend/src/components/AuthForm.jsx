@@ -5,6 +5,7 @@ function AuthForm({
   fields,
   primaryCta,
   secondaryCta,
+  notice,
   onSubmit,
   onSecondary,
   onBack,
@@ -15,6 +16,11 @@ function AuthForm({
         <p className="eyebrow">{eyebrow}</p>
         <h1>{title}</h1>
         <p className="description">{description}</p>
+        {notice && (
+          <div className={`login__notice login__notice--${notice.type}`}>
+            {notice.message}
+          </div>
+        )}
         <form className="login__form" onSubmit={onSubmit}>
           {fields.map((field) => (
             <label className="login__label" key={field.name}>

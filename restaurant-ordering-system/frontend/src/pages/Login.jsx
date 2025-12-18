@@ -1,6 +1,6 @@
 import AuthForm from '../components/AuthForm.jsx'
 
-function Login({ onSubmit, onSignup, onBack }) {
+function Login({ onSubmit, onSignup, onBack, notice }) {
   return (
     <AuthForm
       title="Log in to continue"
@@ -12,6 +12,7 @@ function Login({ onSubmit, onSignup, onBack }) {
       ]}
       primaryCta="Log In"
       secondaryCta="Sign up"
+      notice={notice}
       onSubmit={onSubmit}
       onSecondary={onSignup}
       onBack={onBack}
