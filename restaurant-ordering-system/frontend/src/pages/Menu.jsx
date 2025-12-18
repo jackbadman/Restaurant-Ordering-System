@@ -1,6 +1,6 @@
 import MenuCard from '../components/MenuCard.jsx'
 
-function Menu({ categories, onSelectCategory, onBackHome }) {
+function Menu({ categories, onSelectCategory, onBackHome, isLoading, error }) {
   return (
     <main className="menu">
       <header className="menu__header">
@@ -13,11 +13,18 @@ function Menu({ categories, onSelectCategory, onBackHome }) {
           ← Back to home
         </button>
       </header>
-      <div className="menu-grid">
-        {categories.map((category) => (
-          <MenuCard key={category.id} category={category} onSelect={onSelectCategory} />
-        ))}
-      </div>
+      {isLoading && <p className="description">Loading menu…</p>}
+      {!isLoading && error && <p className="description">{error}</p>}
+      {!isLoading && !error && categories.length === 0 && (
+        <p className="description">No categories available right now.</p>
+      )}
+      {!isLoading && !error && categories.length > 0 && (
+        <div className="menu-grid">
+          {categories.map((category) => (
+            <MenuCard key={category.id} category={category} onSelect={onSelectCategory} />
+          ))}
+        </div>
+      )}
     </main>
   )
 }

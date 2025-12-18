@@ -1,6 +1,8 @@
 import MenuItem from '../components/MenuItem.jsx'
 
 function Category({ category, onBackCategories, onBackHome }) {
+  const items = category.items || []
+
   return (
     <main className="menu">
       <header className="menu__header">
@@ -18,11 +20,15 @@ function Category({ category, onBackCategories, onBackHome }) {
           </button>
         </div>
       </header>
-      <div className="menu-items">
-        {category.items.map((item) => (
-          <MenuItem key={item.name} item={item} />
-        ))}
-      </div>
+      {items.length === 0 ? (
+        <p className="description">No items available in this category yet.</p>
+      ) : (
+        <div className="menu-items">
+          {items.map((item) => (
+            <MenuItem key={item.name} item={item} />
+          ))}
+        </div>
+      )}
     </main>
   )
 }

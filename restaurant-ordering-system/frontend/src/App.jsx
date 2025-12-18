@@ -1,16 +1,103 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import Header from './components/Header.jsx'
-import categories from './data/categories.js'
 import Home from './pages/Home.jsx'
 import Menu from './pages/Menu.jsx'
 import Category from './pages/Category.jsx'
 import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
+import api from './api/axios.js'
+import defaultCategoryImage from './assets/KebabHome.svg'
+import shishImage from './assets/shish_mixed.svg'
+import donerImage from './assets/donner_mixed.svg'
+import kofteImage from './assets/kofte_mixed.svg'
+import sideImage from './assets/salad.svg'
+import drinkImage from './assets/drinks.svg'
+import sauceImage from './assets/sauce.svg'
 
 function App() {
   const [view, setView] = useState('home')
   const [activeCategory, setActiveCategory] = useState(null)
+  const [categories, setCategories] = useState([])
+  const [isLoadingMenu, setIsLoadingMenu] = useState(false)
+  const [menuError, setMenuError] = useState('')
+
+  useEffect(() => {
+    const loadMenu = async () => {
+      setIsLoadingMenu(true)
+      setMenuError('')
+      try {
+        const [categoriesResponse, itemsResponse] = await Promise.all([
+          api.get('/api/categories'),
+          api.get('/api/menuitems'),
+        ])
+        const categoryData = Array.isArray(categoriesResponse.data)
+          ? categoriesResponse.data
+          : []
+        const itemData = Array.isArray(itemsResponse.data) ? itemsResponse.data : []
+
+        const itemsByCategoryId = new Map()
+        itemData.forEach((item) => {
+          const rawCategory = item.categoryId
+          const categoryId =
+            typeof rawCategory === 'string' ? rawCategory : rawCategory?._id
+          if (!categoryId) {
+            return
+          }
+          if (!itemsByCategoryId.has(categoryId)) {
+            itemsByCategoryId.set(categoryId, [])
+          }
+          itemsByCategoryId.get(categoryId).push(item)
+        })
+
+        const hydratedCategories = categoryData.map((category) => {
+          const categoryId = category._id || category.id
+          const itemsForCategory = itemsByCategoryId.get(categoryId) || []
+          const categoryKey = (category.slug || category.name || '').trim().toLowerCase()
+          const categoryImages = {
+            shish: shishImage,
+            doner: donerImage,
+            donner: donerImage,
+            kofte: kofteImage,
+            sides: sideImage,
+            side: sideImage,
+            salad: sideImage,
+            drinks: drinkImage,
+            drink: drinkImage,
+            sauce: sauceImage,
+            sauces: sauceImage,
+          }
+          const coverImage =
+            category.imageURL ||
+            category.image ||
+            categoryImages[categoryKey] ||
+            itemsForCategory.find((item) => item.imageURL)?.imageURL ||
+            defaultCategoryImage
+
+          return {
+            id: categoryId,
+            name: category.name,
+            description: category.description || '',
+            image: coverImage,
+            items: itemsForCategory.map((item) => ({
+              name: item.name,
+              description: item.description || '',
+              price: item.price,
+              imageURL: item.imageURL || '',
+            })),
+          }
+        })
+
+        setCategories(hydratedCategories)
+      } catch (err) {
+        setMenuError('Unable to load the menu right now. Please try again soon.')
+      } finally {
+        setIsLoadingMenu(false)
+      }
+    }
+
+    loadMenu()
+  }, [])
 
   const handleLogin = () => {
     setView('login')
@@ -71,7 +158,13 @@ function App() {
       )}
 
       {view === 'menu' && (
-        <Menu categories={categories} onSelectCategory={openCategory} onBackHome={handleBackHome} />
+        <Menu
+          categories={categories}
+          onSelectCategory={openCategory}
+          onBackHome={handleBackHome}
+          isLoading={isLoadingMenu}
+          error={menuError}
+        />
       )}
 
       {view === 'category' && activeCategory && (
