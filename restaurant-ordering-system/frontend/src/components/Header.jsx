@@ -1,6 +1,6 @@
 import logo from '../assets/logo.svg'
 
-function Header({ onLogin, onBasket, onOrders }) {
+function Header({ onLogin, onBasket, onOrders, onLogout, isLoggedIn }) {
   return (
     <header className="top-bar">
       <div className="brand">
@@ -8,9 +8,15 @@ function Header({ onLogin, onBasket, onOrders }) {
         <span className="brand__name">King Kebab</span>
       </div>
       <div className="actions">
-        <button className="action-button" type="button" onClick={onLogin}>
-          Login
-        </button>
+        {!isLoggedIn ? (
+          <button className="action-button" type="button" onClick={onLogin}>
+            Login
+          </button>
+        ) : (
+          <button className="action-button" type="button" onClick={onLogout}>
+            Logout
+          </button>
+        )}
         {onOrders && (
           <button className="action-button" type="button" onClick={onOrders}>
             Orders

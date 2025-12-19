@@ -1,9 +1,34 @@
 import Order from "../models/Order.js";
 import OrderItem from "../models/OrderItem.js";
+import mongoose from "mongoose";
 
 export const createOrder = async (req, res) => {
   try {
-    const { userId, items } = req.body;
+    const { items } = req.body;
+    const userId = req.user?.userId || req.body.userId;
+
+    if (!req.user?.userId && req.body.userId && !mongoose.Types.ObjectId.isValid(req.body.userId)) {
+      return res.status(400).json({ message: "Invalid user id format" });
+    }
+
+    if (!req.user?.userId && req.body.userId) {
+      if (req.body.userId !== userId.toString()) {
+        return res.status(400).json({ message: "User id mismatch" });
+      }
+    }
+
+    if (!userId) {
+      return res.status(400).json({ message: "User id is required" });
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: "At least one item is required" });
+    }
+
+    console.log("createOrder payload", {
+      userId: userId?.toString(),
+      itemsCount: Array.isArray(items) ? items.length : 0
+    });
 
     const order = await Order.create({ userId });
 
@@ -19,7 +44,8 @@ export const createOrder = async (req, res) => {
     res.json({ message: "Order placed!", orderId: order._id });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("createOrder error", err);
+    res.status(500).json({ error: err.message || "Server error" });
   }
 };
 
@@ -37,9 +63,16 @@ export const getOrder = async (req, res) => {
 
 export const getOrdersForUser = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const requestedUserId = req.params.userId;
+    const tokenUserId = req.user?.userId;
+    const userId = tokenUserId || requestedUserId;
+
     if (!userId) {
       return res.status(400).json({ message: "User id is required" });
+    }
+
+    if (tokenUserId && tokenUserId !== requestedUserId) {
+      return res.status(403).json({ message: "Forbidden: cannot view other users' orders" });
     }
 
     const orders = await Order.find({ userId }).sort({ createdAt: -1 });

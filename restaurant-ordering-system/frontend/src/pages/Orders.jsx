@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import api from '../api/axios.js'
 
-function Orders({ onBackHome }) {
-  const [userId, setUserId] = useState('')
+function Orders({ onBackHome, auth }) {
+  const [userId, setUserId] = useState(auth?.userId || '')
   const [activeTab, setActiveTab] = useState('history')
   const [orders, setOrders] = useState([])
   const [ordersError, setOrdersError] = useState('')
@@ -29,7 +29,10 @@ function Orders({ onBackHome }) {
     }
 
     loadMenuItems()
-  }, [])
+    if (auth?.userId) {
+      setUserId(auth.userId)
+    }
+  }, [auth?.userId])
 
   const handleUserIdChange = (event) => {
     setUserId(event.target.value)
@@ -49,7 +52,11 @@ function Orders({ onBackHome }) {
       const data = Array.isArray(response.data?.orders) ? response.data.orders : []
       setOrders(data)
     } catch (err) {
-      setOrdersError('Unable to load orders right now.')
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        'Unable to load orders right now.'
+      setOrdersError(message)
     } finally {
       setOrdersLoading(false)
     }
@@ -112,7 +119,12 @@ function Orders({ onBackHome }) {
       await fetchOrders()
       setActiveTab('history')
     } catch (err) {
-      setOrderStatus({ type: 'error', message: 'Unable to place order right now.' })
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        'Unable to place order right now.'
+      setOrderStatus({ type: 'error', message })
     }
   }
 
@@ -141,6 +153,7 @@ function Orders({ onBackHome }) {
               value={userId}
               onChange={handleUserIdChange}
               placeholder="Paste your user id"
+              disabled={Boolean(auth?.userId)}
             />
           </label>
           <div className="orders__tabs">

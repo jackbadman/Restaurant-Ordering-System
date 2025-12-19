@@ -22,7 +22,9 @@ const orderSchema = new mongoose.Schema({
 
 orderSchema.pre("save", function(next) {
   this.updatedAt = Date.now();
-  next();
+  if (typeof next === "function") {
+    next();
+  }
 });
 
 export default mongoose.model("Order", orderSchema);
