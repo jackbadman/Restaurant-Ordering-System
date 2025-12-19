@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import api from '../api/axios.js'
 
 function Orders({ onBackHome, auth }) {
-  const [userId, setUserId] = useState(auth?.userId || '')
+  const userId = auth?.userId || ''
   const [activeTab, setActiveTab] = useState('history')
   const [orders, setOrders] = useState([])
   const [ordersError, setOrdersError] = useState('')
@@ -29,20 +29,11 @@ function Orders({ onBackHome, auth }) {
     }
 
     loadMenuItems()
-    if (auth?.userId) {
-      setUserId(auth.userId)
-    }
   }, [auth?.userId])
-
-  const handleUserIdChange = (event) => {
-    setUserId(event.target.value)
-    setOrdersError('')
-    setOrderStatus(null)
-  }
 
   const fetchOrders = async () => {
     if (!userId.trim()) {
-      setOrdersError('Enter a user id to load orders.')
+      setOrdersError('Please login to view orders.')
       return
     }
     setOrdersLoading(true)
@@ -96,7 +87,7 @@ function Orders({ onBackHome, auth }) {
 
   const handleCreateOrder = async () => {
     if (!userId.trim()) {
-      setOrderStatus({ type: 'error', message: 'Enter a user id to place an order.' })
+      setOrderStatus({ type: 'error', message: 'Please login to place an order.' })
       return
     }
     if (selectedItems.length === 0) {
@@ -145,17 +136,6 @@ function Orders({ onBackHome, auth }) {
 
       <section className="orders__panel">
         <div className="orders__toolbar">
-          <label className="orders__label">
-            User ID
-            <input
-              className="orders__input"
-              type="text"
-              value={userId}
-              onChange={handleUserIdChange}
-              placeholder="Paste your user id"
-              disabled={Boolean(auth?.userId)}
-            />
-          </label>
           <div className="orders__tabs">
             <button
               className={`orders__tab ${activeTab === 'history' ? 'orders__tab--active' : ''}`}

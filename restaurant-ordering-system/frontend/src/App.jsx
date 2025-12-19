@@ -15,6 +15,7 @@ import { decodeJwt } from './utils/decodeJwt.js'
 function App() {
   const [view, setView] = useState('home')
   const [activeCategory, setActiveCategory] = useState(null)
+  const [loginNotice, setLoginNotice] = useState(null)
   const [auth, setAuth] = useState({ token: null, userId: null, role: null })
   const { categories, isLoadingMenu, menuError } = useMenu()
   const {
@@ -23,7 +24,7 @@ function App() {
     signupStatus,
     loginStatus,
     clearSignupStatus,
-  } = useAuthForm({ setView, setAuth })
+  } = useAuthForm({ setView, setAuth, setLoginNotice })
 
   useEffect(() => {
     const stored = localStorage.getItem('authToken')
@@ -51,6 +52,7 @@ function App() {
 
   const handleLogin = () => {
     clearSignupStatus()
+    setLoginNotice(null)
     setView('login')
   }
 
@@ -61,11 +63,13 @@ function App() {
 
   const handleBackHome = () => {
     clearSignupStatus()
+    setLoginNotice(null)
     setView('home')
   }
 
   const goToSignup = () => {
     clearSignupStatus()
+    setLoginNotice(null)
     setView('signup')
   }
 
@@ -75,6 +79,11 @@ function App() {
   }
 
   const goToOrders = () => {
+    if (!auth.token) {
+      setLoginNotice({ type: 'error', message: 'Please login to view your orders.' })
+      setView('login')
+      return
+    }
     setView('orders')
   }
 
@@ -112,7 +121,7 @@ function App() {
           onSubmit={handleLoginSubmit}
           onSignup={goToSignup}
           onBack={handleBackHome}
-          notice={loginStatus || signupStatus}
+          notice={loginNotice || loginStatus || signupStatus}
         />
       )}
 

@@ -8,7 +8,7 @@ const initialPayload = {
   password: '',
 }
 
-export default function useAuthForm({ setView, setAuth }) {
+export default function useAuthForm({ setView, setAuth, setLoginNotice }) {
   const [signupStatus, setSignupStatus] = useState(null)
   const [loginStatus, setLoginStatus] = useState(null)
 
@@ -31,6 +31,7 @@ export default function useAuthForm({ setView, setAuth }) {
       })
       localStorage.setItem('authToken', token)
       event.target.reset()
+      setLoginNotice?.(null)
       setView('home')
     } catch (err) {
       const message =
