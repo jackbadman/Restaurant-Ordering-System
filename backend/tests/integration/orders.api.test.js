@@ -38,13 +38,21 @@ describe("Orders API integration tests", () => {
   });
 
   test("POST /api/orders creates an order for authenticated user", async () => {
-    const menuItemId = new mongoose.Types.ObjectId().toString();
+    const category = await Category.create({
+      name: "Mains",
+      slug: "mains"
+    });
+    const menuItem = await MenuItem.create({
+      name: "Test Item",
+      price: 5,
+      categoryId: category._id
+    });
     const res = await request(app)
       .post("/api/orders")
       .set("Authorization", `Bearer ${token}`)
       .send({
         items: [
-          { menuItemId, quantity: 1, price: 5 }
+          { menuItemId: menuItem._id.toString(), quantity: 1 }
         ]
       });
 

@@ -1,5 +1,7 @@
 import { jest } from "@jest/globals";
 import mongoose from "mongoose";
+import Category from "../../src/models/Category.js";
+import MenuItem from "../../src/models/MenuItem.js";
 import Order from "../../src/models/Order.js";
 import { createOrder, getOrdersForUser } from "../../src/controllers/orderController.js";
 
@@ -21,10 +23,18 @@ describe("orderController", () => {
 
   test("createOrder persists order with items", async () => {
     const userId = new mongoose.Types.ObjectId().toString();
-    const menuItemId = new mongoose.Types.ObjectId().toString();
+    const category = await Category.create({
+      name: "Test Category",
+      slug: "test-category"
+    });
+    const menuItem = await MenuItem.create({
+      name: "Test Item",
+      price: 5,
+      categoryId: category._id
+    });
     const req = {
       body: {
-        items: [{ menuItemId, quantity: 1, price: 5 }]
+        items: [{ menuItemId: menuItem._id.toString(), quantity: 1 }]
       },
       user: { userId }
     };

@@ -1,5 +1,6 @@
 import Order from "../models/Order.js";
 import OrderItem from "../models/OrderItem.js";
+import MenuItem from "../models/MenuItem.js";
 import mongoose from "mongoose";
 
 export const createOrder = async (req, res) => {
@@ -33,11 +34,16 @@ export const createOrder = async (req, res) => {
     const order = await Order.create({ userId });
 
     for (let item of items) {
+      const menuItem = await MenuItem.findById(item.menuItemId);
+      if (!menuItem) {
+        await Order.deleteOne({ _id: order._id });
+        return res.status(400).json({ message: "Invalid menu item" });
+      }
       await OrderItem.create({
         orderId: order._id,
         menuItemId: item.menuItemId,
         quantity: item.quantity,
-        price: item.price
+        price: menuItem.price
       });
     }
 
