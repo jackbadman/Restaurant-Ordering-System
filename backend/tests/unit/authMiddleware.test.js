@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 import jwt from "jsonwebtoken";
-import { requireAuth } from "../src/middleware/authMiddleware.js";
+import { requireAuth } from "../../src/middleware/authMiddleware.js";
 
 const mockRes = () => {
   const res = {};
