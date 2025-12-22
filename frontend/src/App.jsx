@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import Header from './components/Header.jsx'
 import Home from './pages/Home.jsx'
@@ -16,7 +16,18 @@ function App() {
   const [view, setView] = useState('home')
   const [activeCategory, setActiveCategory] = useState(null)
   const [loginNotice, setLoginNotice] = useState(null)
-  const [auth, setAuth] = useState({ token: null, userId: null, role: null })
+  const [auth, setAuth] = useState(() => {
+    const stored = localStorage.getItem('authToken')
+    if (!stored) {
+      return { token: null, userId: null, role: null }
+    }
+    const decoded = decodeJwt(stored)
+    if (decoded?.userId) {
+      return { token: stored, userId: decoded.userId, role: decoded.role || null }
+    }
+    localStorage.removeItem('authToken')
+    return { token: null, userId: null, role: null }
+  })
   const { categories, isLoadingMenu, menuError } = useMenu()
   const {
     handleLoginSubmit,
@@ -25,22 +36,6 @@ function App() {
     loginStatus,
     clearSignupStatus,
   } = useAuthForm({ setView, setAuth, setLoginNotice })
-
-  useEffect(() => {
-    const stored = localStorage.getItem('authToken')
-    if (stored) {
-      const decoded = decodeJwt(stored)
-      if (decoded?.userId) {
-        setAuth({
-          token: stored,
-          userId: decoded.userId,
-          role: decoded.role || null,
-        })
-      } else {
-        localStorage.removeItem('authToken')
-      }
-    }
-  }, [])
 
   useEffect(() => {
     if (auth.token) {

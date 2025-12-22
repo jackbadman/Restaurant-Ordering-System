@@ -81,7 +81,7 @@ export default function useMenu() {
         })
 
         setCategories(hydratedCategories)
-      } catch (err) {
+      } catch {
         setMenuError('Unable to load the menu right now. Please try again soon.')
       } finally {
         setIsLoadingMenu(false)

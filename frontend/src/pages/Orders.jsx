@@ -21,7 +21,7 @@ function Orders({ onBackHome, auth }) {
         const response = await api.get('/api/menuitems')
         const data = Array.isArray(response.data) ? response.data : []
         setMenuItems(data)
-      } catch (err) {
+      } catch {
         setMenuError('Unable to load menu items right now.')
       } finally {
         setMenuLoading(false)
