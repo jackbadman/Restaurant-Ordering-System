@@ -175,3 +175,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Mongo
+mongo-data
