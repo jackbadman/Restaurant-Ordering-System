@@ -1,4 +1,3 @@
-import { jest } from "@jest/globals";
 import OrderItem from "../../src/models/OrderItem.js";
 
 describe("OrderItem model", () => {
