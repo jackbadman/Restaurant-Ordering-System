@@ -48,6 +48,17 @@ export const createOrder = async (req, res) => {
       });
     }
 
+    try {
+      const io = getIO();
+      io.emit("orderCreated", {
+        orderId: order._id.toString(),
+        status: order.status,
+        createdAt: order.createdAt
+      });
+    } catch (err) {
+      console.error("Socket emit failed", err);
+    }
+
     res.json({ message: "Order placed!", orderId: order._id });
 
   } catch (err) {

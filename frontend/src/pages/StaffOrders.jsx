@@ -41,6 +41,12 @@ function StaffOrders({ onBackHome, auth }) {
   }, [fetchOrders])
 
   useEffect(() => {
+    if (auth?.token && isStaff) {
+      fetchOrders()
+    }
+  }, [auth?.token, fetchOrders, isStaff])
+
+  useEffect(() => {
     setStatusEdits((prev) => {
       const next = { ...prev }
       const validIds = new Set()
@@ -84,10 +90,16 @@ function StaffOrders({ onBackHome, auth }) {
       )
     }
 
+    const handleOrderCreated = () => {
+      fetchOrders()
+    }
+
     socket.on('orderStatusUpdated', handleStatusUpdate)
+    socket.on('orderCreated', handleOrderCreated)
 
     return () => {
       socket.off('orderStatusUpdated', handleStatusUpdate)
+      socket.off('orderCreated', handleOrderCreated)
       if (socket.connected) {
         socket.disconnect()
       }

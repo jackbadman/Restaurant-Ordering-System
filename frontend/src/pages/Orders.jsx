@@ -92,6 +92,12 @@ function Orders({ onBackHome, auth }) {
     }
   }, [auth?.token, activeTab, fetchOrders])
 
+  useEffect(() => {
+    if (auth?.token) {
+      fetchOrders()
+    }
+  }, [auth?.token, fetchOrders])
+
 
   const parsedQuantities = useMemo(() => {
     const entries = Object.entries(quantities).map(([id, value]) => [
@@ -197,14 +203,7 @@ function Orders({ onBackHome, auth }) {
         {activeTab === 'history' && (
           <div className="orders__section">
             <div className="orders__actions">
-              <button
-                className="orders__primary"
-                type="button"
-                onClick={fetchOrders}
-                disabled={ordersLoading}
-              >
-                {ordersLoading ? 'Loading...' : 'Load orders'}
-              </button>
+              {ordersLoading && <p className="orders__helper">Loading orders...</p>}
               {ordersError && <p className="orders__helper">{ordersError}</p>}
             </div>
 
