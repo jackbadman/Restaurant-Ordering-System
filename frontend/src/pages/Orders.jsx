@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import api from '../api/axios.js'
 import { socket } from '../utils/socket.js'
 
@@ -32,7 +32,7 @@ function Orders({ onBackHome, auth }) {
     loadMenuItems()
   }, [auth?.userId])
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     if (!userId.trim()) {
       setOrdersError('Please login to view orders.')
       return
@@ -52,7 +52,7 @@ function Orders({ onBackHome, auth }) {
     } finally {
       setOrdersLoading(false)
     }
-  }
+  }, [userId])
 
   useEffect(() => {
     if (!auth?.token) {
@@ -89,13 +89,13 @@ function Orders({ onBackHome, auth }) {
         socket.disconnect()
       }
     }
-  }, [auth?.token])
+  }, [auth?.token, fetchOrders])
 
   useEffect(() => {
     if (auth?.token && activeTab === 'history') {
       fetchOrders()
     }
-  }, [auth?.token, activeTab])
+  }, [auth?.token, activeTab, fetchOrders])
 
   const parsedQuantities = useMemo(() => {
     const entries = Object.entries(quantities).map(([id, value]) => [
