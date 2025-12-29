@@ -30,6 +30,7 @@ function App() {
     return { token: null, userId: null, role: null }
   })
   const { categories, isLoadingMenu, menuError } = useMenu()
+  const isStaff = auth.role === 'staff'
   const {
     handleLoginSubmit,
     handleSignupSubmit,
@@ -52,15 +53,11 @@ function App() {
     setView('login')
   }
 
-  const handleBasket = () => {
-    // Placeholder for opening basket
-    console.log('Open basket')
-  }
 
   const handleBackHome = () => {
     clearSignupStatus()
     setLoginNotice(null)
-    setView('home')
+    setView(isStaff ? 'staff-orders' : 'home')
   }
 
   const goToSignup = () => {
@@ -70,11 +67,19 @@ function App() {
   }
 
   const goToMenu = () => {
+    if (isStaff) {
+      setView('staff-orders')
+      return
+    }
     setActiveCategory(null)
     setView('menu')
   }
 
   const goToOrders = () => {
+    if (isStaff) {
+      setView('staff-orders')
+      return
+    }
     if (!auth.token) {
       setLoginNotice({ type: 'error', message: 'Please login to view your orders.' })
       setView('login')
@@ -110,12 +115,11 @@ function App() {
     <div className="page">
       <Header
         onLogin={handleLogin}
-        onBasket={handleBasket}
-        onOrders={goToOrders}
+        onOrders={isStaff ? null : goToOrders}
         onStaffOrders={auth.role === 'staff' ? goToStaffOrders : null}
         onLogout={handleLogout}
         isLoggedIn={Boolean(auth.token)}
-        isStaff={auth.role === 'staff'}
+        isStaff={isStaff}
       />
 
       {view === 'login' && (
@@ -136,7 +140,7 @@ function App() {
         />
       )}
 
-      {view === 'menu' && (
+      {!isStaff && view === 'menu' && (
         <Menu
           categories={categories}
           onSelectCategory={openCategory}
@@ -146,7 +150,7 @@ function App() {
         />
       )}
 
-      {view === 'category' && activeCategory && (
+      {!isStaff && view === 'category' && activeCategory && (
         <Category
           category={activeCategory}
           onBackCategories={() => setView('menu')}
@@ -154,17 +158,15 @@ function App() {
         />
       )}
 
-      {view === 'home' && (
+      {!isStaff && view === 'home' && (
         <Home onMenu={goToMenu} onOrders={goToOrders} />
       )}
 
-      {view === 'orders' && (
+      {!isStaff && view === 'orders' && (
         <Orders onBackHome={handleBackHome} auth={auth} />
       )}
 
-      {view === 'staff-orders' && (
-        <StaffOrders onBackHome={handleBackHome} auth={auth} />
-      )}
+      {isStaff && <StaffOrders onBackHome={handleBackHome} auth={auth} />}
     </div>
   )
 }

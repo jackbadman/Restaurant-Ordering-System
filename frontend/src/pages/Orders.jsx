@@ -4,7 +4,7 @@ import { socket } from '../utils/socket.js'
 
 function Orders({ onBackHome, auth }) {
   const userId = auth?.userId || ''
-  const [activeTab, setActiveTab] = useState('history')
+  const [activeTab, setActiveTab] = useState('new')
   const [orders, setOrders] = useState([])
   const [ordersError, setOrdersError] = useState('')
   const [ordersLoading, setOrdersLoading] = useState(false)
@@ -66,19 +66,14 @@ function Orders({ onBackHome, auth }) {
       if (!payload?.orderId) {
         return
       }
-      let didUpdate = false
       setOrders((prev) =>
-        prev.map((order) => {
-          if (order._id === payload.orderId) {
-            didUpdate = true
-            return { ...order, status: payload.status, updatedAt: payload.updatedAt }
-          }
-          return order
-        })
+        prev.map((order) =>
+          order._id === payload.orderId
+            ? { ...order, status: payload.status, updatedAt: payload.updatedAt }
+            : order
+        )
       )
-      if (!didUpdate) {
-        fetchOrders()
-      }
+      fetchOrders()
     }
 
     socket.on('orderStatusUpdated', handleStatusUpdate)
@@ -96,6 +91,7 @@ function Orders({ onBackHome, auth }) {
       fetchOrders()
     }
   }, [auth?.token, activeTab, fetchOrders])
+
 
   const parsedQuantities = useMemo(() => {
     const entries = Object.entries(quantities).map(([id, value]) => [

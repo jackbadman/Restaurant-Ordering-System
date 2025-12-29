@@ -1,6 +1,6 @@
 import logo from '../assets/logo.svg'
 
-function Header({ onLogin, onBasket, onOrders, onStaffOrders, onLogout, isLoggedIn, isStaff }) {
+function Header({ onLogin, onOrders, onStaffOrders, onLogout, isLoggedIn, isStaff }) {
   return (
     <header className="top-bar">
       <div className="brand">
@@ -27,9 +27,6 @@ function Header({ onLogin, onBasket, onOrders, onStaffOrders, onLogout, isLogged
             Orders
           </button>
         )}
-        <button className="icon-button" type="button" aria-label="Basket" onClick={onBasket}>
-          🧺
-        </button>
       </div>
     </header>
   )
