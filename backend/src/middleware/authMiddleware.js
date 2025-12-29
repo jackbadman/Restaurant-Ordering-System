@@ -18,3 +18,12 @@ export const requireAuth = (req, res, next) => {
       : res.status(500).json({ message: "Routing error: next not provided" });
   });
 };
+
+export const requireStaff = (req, res, next) => {
+  if (req.user?.role !== "staff") {
+    return res.status(403).json({ message: "Forbidden: staff access required" });
+  }
+  return typeof next === "function"
+    ? next()
+    : res.status(500).json({ message: "Routing error: next not provided" });
+};

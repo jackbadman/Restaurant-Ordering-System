@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import api from '../api/axios.js'
+import { socket } from '../utils/socket.js'
 
 function Orders({ onBackHome, auth }) {
   const userId = auth?.userId || ''
@@ -52,6 +53,49 @@ function Orders({ onBackHome, auth }) {
       setOrdersLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (!auth?.token) {
+      return
+    }
+    if (!socket.connected) {
+      socket.connect()
+    }
+
+    const handleStatusUpdate = (payload) => {
+      if (!payload?.orderId) {
+        return
+      }
+      let didUpdate = false
+      setOrders((prev) =>
+        prev.map((order) => {
+          if (order._id === payload.orderId) {
+            didUpdate = true
+            return { ...order, status: payload.status, updatedAt: payload.updatedAt }
+          }
+          return order
+        })
+      )
+      if (!didUpdate) {
+        fetchOrders()
+      }
+    }
+
+    socket.on('orderStatusUpdated', handleStatusUpdate)
+
+    return () => {
+      socket.off('orderStatusUpdated', handleStatusUpdate)
+      if (socket.connected) {
+        socket.disconnect()
+      }
+    }
+  }, [auth?.token])
+
+  useEffect(() => {
+    if (auth?.token && activeTab === 'history') {
+      fetchOrders()
+    }
+  }, [auth?.token, activeTab])
 
   const parsedQuantities = useMemo(() => {
     const entries = Object.entries(quantities).map(([id, value]) => [

@@ -32,7 +32,7 @@ export default function useAuthForm({ setView, setAuth, setLoginNotice }) {
       localStorage.setItem('authToken', token)
       event.target.reset()
       setLoginNotice?.(null)
-      setView('home')
+      setView(decoded?.role === 'staff' ? 'staff-orders' : 'home')
     } catch (err) {
       const message =
         err?.response?.data?.message ||

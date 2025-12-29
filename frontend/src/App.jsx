@@ -7,6 +7,7 @@ import Category from './pages/Category.jsx'
 import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
 import Orders from './pages/Orders.jsx'
+import StaffOrders from './pages/StaffOrders.jsx'
 import useAuthForm from './hooks/useAuthForm.js'
 import useMenu from './hooks/useMenu.js'
 import api from './api/axios.js'
@@ -88,6 +89,10 @@ function App() {
     setView('home')
   }
 
+  const goToStaffOrders = () => {
+    setView('staff-orders')
+  }
+
   const goToLogin = () => {
     clearSignupStatus()
     setView('login')
@@ -107,8 +112,10 @@ function App() {
         onLogin={handleLogin}
         onBasket={handleBasket}
         onOrders={goToOrders}
+        onStaffOrders={auth.role === 'staff' ? goToStaffOrders : null}
         onLogout={handleLogout}
         isLoggedIn={Boolean(auth.token)}
+        isStaff={auth.role === 'staff'}
       />
 
       {view === 'login' && (
@@ -153,6 +160,10 @@ function App() {
 
       {view === 'orders' && (
         <Orders onBackHome={handleBackHome} auth={auth} />
+      )}
+
+      {view === 'staff-orders' && (
+        <StaffOrders onBackHome={handleBackHome} auth={auth} />
       )}
     </div>
   )

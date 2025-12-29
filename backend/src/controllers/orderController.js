@@ -2,6 +2,7 @@ import Order from "../models/Order.js";
 import OrderItem from "../models/OrderItem.js";
 import MenuItem from "../models/MenuItem.js";
 import mongoose from "mongoose";
+import { getIO } from "../socket.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -107,6 +108,86 @@ export const getOrdersForUser = async (req, res) => {
 
     res.json({ orders: payload });
 
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getAllOrders = async (req, res) => {
+  try {
+    const statusFilter = req.query.status?.toString().trim();
+    const allowedStatuses = Order.schema.path("status").enumValues;
+    const filter = {};
+
+    if (statusFilter) {
+      if (!allowedStatuses.includes(statusFilter)) {
+        return res.status(400).json({ message: "Invalid order status filter" });
+      }
+      filter.status = statusFilter;
+    }
+
+    const orders = await Order.find(filter)
+      .sort({ createdAt: -1 })
+      .populate("userId");
+
+    if (orders.length === 0) {
+      return res.json({ orders: [] });
+    }
+
+    const orderIds = orders.map((order) => order._id);
+    const items = await OrderItem.find({ orderId: { $in: orderIds } }).populate(
+      "menuItemId"
+    );
+
+    const itemsByOrderId = new Map();
+    items.forEach((item) => {
+      const key = item.orderId.toString();
+      if (!itemsByOrderId.has(key)) {
+        itemsByOrderId.set(key, []);
+      }
+      itemsByOrderId.get(key).push(item);
+    });
+
+    const payload = orders.map((order) => ({
+      ...order.toObject(),
+      items: itemsByOrderId.get(order._id.toString()) || []
+    }));
+
+    res.json({ orders: payload });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const allowedStatuses = Order.schema.path("status").enumValues;
+
+    if (!status || !allowedStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid order status" });
+    }
+
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    order.status = status;
+    await order.save();
+
+    try {
+      const io = getIO();
+      io.emit("orderStatusUpdated", {
+        orderId: order._id.toString(),
+        status: order.status,
+        updatedAt: order.updatedAt
+      });
+    } catch (err) {
+      console.error("Socket emit failed", err);
+    }
+
+    res.json({ message: "Order status updated", order });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

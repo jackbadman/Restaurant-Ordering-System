@@ -1,8 +1,10 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
+import http from "http";
 import cors from "cors";
 import connectDB from "./config/db.js";
+import { initSocket } from "./socket.js";
 
 import userRoutes from "./routes/userRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
@@ -24,7 +26,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/", (req, res) => res.send("API running...") );
+app.get("/", (req, res) => res.send("API running..."));
 
 app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
@@ -37,4 +39,6 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const server = http.createServer(app);
+initSocket(server);
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
