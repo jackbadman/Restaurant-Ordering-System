@@ -37,10 +37,6 @@ function StaffOrders({ onBackHome, auth }) {
   }, [isStaff, statusFilter])
 
   useEffect(() => {
-    fetchOrders()
-  }, [fetchOrders])
-
-  useEffect(() => {
     if (auth?.token && isStaff) {
       fetchOrders()
     }

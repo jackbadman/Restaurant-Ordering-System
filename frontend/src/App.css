@@ -410,6 +410,24 @@
   gap: 16px;
 }
 
+.orders__menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.orders__menu-category {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.orders__menu-heading {
+  margin: 0;
+  font-size: 18px;
+  color: #111827;
+}
+
 .orders__menu-card {
   border: 1px solid #e5e7eb;
   border-radius: 14px;

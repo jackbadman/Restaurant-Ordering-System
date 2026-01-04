@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import api from '../api/axios.js'
 import { socket } from '../utils/socket.js'
 
@@ -9,20 +9,43 @@ function Orders({ onBackHome, auth }) {
   const [ordersError, setOrdersError] = useState('')
   const [ordersLoading, setOrdersLoading] = useState(false)
   const [menuItems, setMenuItems] = useState([])
+  const [categories, setCategories] = useState([])
   const [menuError, setMenuError] = useState('')
   const [menuLoading, setMenuLoading] = useState(false)
   const [quantities, setQuantities] = useState({})
   const [orderStatus, setOrderStatus] = useState(null)
+  const noticeRef = useRef(null)
+  const historyTopRef = useRef(null)
 
   useEffect(() => {
     const loadMenuItems = async () => {
       setMenuLoading(true)
       setMenuError('')
       try {
-        const response = await api.get('/api/menuitems')
-        const data = Array.isArray(response.data) ? response.data : []
-        setMenuItems(data)
-      } catch {
+        const [menuResult, categoriesResult] = await Promise.allSettled([
+          api.get('/api/menuitems'),
+          api.get('/api/categories'),
+        ])
+        if (menuResult.status === 'fulfilled') {
+          const data = Array.isArray(menuResult.value.data) ? menuResult.value.data : []
+          setMenuItems(data)
+        } else {
+          setMenuItems([])
+          setMenuError('Unable to load menu items right now.')
+        }
+
+        if (categoriesResult.status === 'fulfilled') {
+          const categoryData = Array.isArray(categoriesResult.value.data)
+            ? categoriesResult.value.data
+            : []
+          setCategories(categoryData)
+        } else {
+          setCategories([])
+        }
+      } catch (err) {
+        console.error('Menu load failed', err)
+        setMenuItems([])
+        setCategories([])
         setMenuError('Unable to load menu items right now.')
       } finally {
         setMenuLoading(false)
@@ -89,6 +112,7 @@ function Orders({ onBackHome, auth }) {
   useEffect(() => {
     if (auth?.token && activeTab === 'history') {
       fetchOrders()
+      historyTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }, [auth?.token, activeTab, fetchOrders])
 
@@ -118,6 +142,72 @@ function Orders({ onBackHome, auth }) {
       }))
   }, [menuItems, parsedQuantities])
 
+  const groupedMenuItems = useMemo(() => {
+    const categoryNameById = new Map()
+    const itemsByCategoryId = new Map()
+    const uncategorized = []
+    const seenCategoryIds = new Set()
+
+    categories.forEach((category) => {
+      const id = category._id || category.id
+      if (!id) return
+      seenCategoryIds.add(id)
+      categoryNameById.set(id, category.name || 'Category')
+    })
+
+    menuItems.forEach((item) => {
+      const rawCategory = item.categoryId
+      const categoryId = typeof rawCategory === 'string' ? rawCategory : rawCategory?._id
+      const categoryName =
+        typeof rawCategory === 'object' && rawCategory?.name
+          ? rawCategory.name
+          : null
+
+      if (!categoryId) {
+        uncategorized.push(item)
+        return
+      }
+
+      if (!itemsByCategoryId.has(categoryId)) {
+        itemsByCategoryId.set(categoryId, [])
+      }
+      itemsByCategoryId.get(categoryId).push(item)
+
+      if (categoryName && !categoryNameById.has(categoryId)) {
+        categoryNameById.set(categoryId, categoryName)
+      }
+    })
+
+    const orderedCategories = categories
+      .map((category) => ({
+        id: category._id || category.id,
+        name: category.name || 'Category',
+      }))
+      .filter((category) => category.id)
+
+    const grouped = []
+
+    orderedCategories.forEach((category) => {
+      const items = itemsByCategoryId.get(category.id) || []
+      if (items.length > 0) {
+        grouped.push({ id: category.id, name: category.name, items })
+      }
+    })
+
+    Array.from(itemsByCategoryId.keys()).forEach((categoryId) => {
+      if (!seenCategoryIds.has(categoryId)) {
+        const name = categoryNameById.get(categoryId) || 'Other'
+        grouped.push({ id: categoryId, name, items: itemsByCategoryId.get(categoryId) })
+      }
+    })
+
+    if (uncategorized.length > 0) {
+      grouped.push({ id: 'uncategorized', name: 'Uncategorized', items: uncategorized })
+    }
+
+    return grouped
+  }, [categories, menuItems])
+
   const orderTotal = selectedItems.reduce(
     (total, item) => total + item.quantity * item.price,
     0
@@ -134,10 +224,12 @@ function Orders({ onBackHome, auth }) {
   const handleCreateOrder = async () => {
     if (!userId.trim()) {
       setOrderStatus({ type: 'error', message: 'Please login to place an order.' })
+      noticeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       return
     }
     if (selectedItems.length === 0) {
       setOrderStatus({ type: 'error', message: 'Select at least one item.' })
+      noticeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       return
     }
 
@@ -151,10 +243,11 @@ function Orders({ onBackHome, auth }) {
         })),
       }
       await api.post('/api/orders', payload)
-      setOrderStatus({ type: 'success', message: 'Order placed successfully.' })
+      setOrderStatus({ type: 'success', message: 'Order created successfully.' })
       setQuantities({})
       await fetchOrders()
       setActiveTab('history')
+      noticeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     } catch (err) {
       const message =
         err?.response?.data?.message ||
@@ -162,6 +255,7 @@ function Orders({ onBackHome, auth }) {
         err?.message ||
         'Unable to place order right now.'
       setOrderStatus({ type: 'error', message })
+      noticeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }
 
@@ -201,8 +295,13 @@ function Orders({ onBackHome, auth }) {
         </div>
 
         {activeTab === 'history' && (
-          <div className="orders__section">
+          <div className="orders__section" ref={historyTopRef}>
             <div className="orders__actions">
+              {orderStatus?.type === 'success' && (
+                <div className={`orders__notice orders__notice--${orderStatus.type}`}>
+                  {orderStatus.message}
+                </div>
+              )}
               {ordersLoading && <p className="orders__helper">Loading orders...</p>}
               {ordersError && <p className="orders__helper">{ordersError}</p>}
             </div>
@@ -244,7 +343,7 @@ function Orders({ onBackHome, auth }) {
 
         {activeTab === 'new' && (
           <div className="orders__section">
-            <div className="orders__actions">
+            <div className="orders__actions" ref={noticeRef}>
               {orderStatus && (
                 <div className={`orders__notice orders__notice--${orderStatus.type}`}>
                   {orderStatus.message}
@@ -259,30 +358,37 @@ function Orders({ onBackHome, auth }) {
                 <p className="orders__helper">No menu items available.</p>
               )}
               {!menuLoading && menuItems.length > 0 && (
-                <div className="orders__menu-grid">
-                  {menuItems.map((item) => (
-                    <article className="orders__menu-card" key={item._id}>
-                      <div>
-                        <h3>{item.name}</h3>
-                        <p className="orders__meta">£{Number(item.price).toFixed(2)}</p>
-                        {item.description && (
-                          <p className="orders__helper">{item.description}</p>
-                        )}
+                <div className="orders__menu-list">
+                  {groupedMenuItems.map((group) => (
+                    <section className="orders__menu-category" key={group.id}>
+                      <h3 className="orders__menu-heading">{group.name}</h3>
+                      <div className="orders__menu-grid">
+                        {group.items.map((item) => (
+                          <article className="orders__menu-card" key={item._id}>
+                            <div>
+                              <h3>{item.name}</h3>
+                              <p className="orders__meta">£{Number(item.price).toFixed(2)}</p>
+                              {item.description && (
+                                <p className="orders__helper">{item.description}</p>
+                              )}
+                            </div>
+                            <label className="orders__qty">
+                              Qty
+                              <input
+                                className="orders__input"
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={parsedQuantities[item._id] ?? 0}
+                                onChange={(event) =>
+                                  handleQuantityChange(item._id, event.target.value)
+                                }
+                              />
+                            </label>
+                          </article>
+                        ))}
                       </div>
-                      <label className="orders__qty">
-                        Qty
-                        <input
-                          className="orders__input"
-                          type="number"
-                          min="0"
-                          step="1"
-                          value={parsedQuantities[item._id] ?? 0}
-                          onChange={(event) =>
-                            handleQuantityChange(item._id, event.target.value)
-                          }
-                        />
-                      </label>
-                    </article>
+                    </section>
                   ))}
                 </div>
               )}
