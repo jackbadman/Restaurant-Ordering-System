@@ -15,10 +15,7 @@ import api from './api/axios.js'
 import { decodeJwt } from './utils/decodeJwt.js'
 
 function App() {
-  const [view, setView] = useState('home')
-  const [activeCategory, setActiveCategory] = useState(null)
-  const [loginNotice, setLoginNotice] = useState(null)
-  const [auth, setAuth] = useState(() => {
+  const getStoredAuth = () => {
     const stored = localStorage.getItem('authToken')
     if (!stored) {
       return { token: null, userId: null, role: null }
@@ -29,7 +26,20 @@ function App() {
     }
     localStorage.removeItem('authToken')
     return { token: null, userId: null, role: null }
+  }
+  const initialAuth = getStoredAuth()
+  const [view, setView] = useState(() => {
+    if (initialAuth.role === 'manager') {
+      return 'manager-menu'
+    }
+    if (initialAuth.role === 'staff') {
+      return 'staff-orders'
+    }
+    return 'home'
   })
+  const [activeCategory, setActiveCategory] = useState(null)
+  const [loginNotice, setLoginNotice] = useState(null)
+  const [auth, setAuth] = useState(initialAuth)
   const { categories, isLoadingMenu, menuError, reloadMenu } = useMenu()
   const isStaff = auth.role === 'staff'
   const isManager = auth.role === 'manager'
@@ -48,12 +58,6 @@ function App() {
       delete api.defaults.headers.common.Authorization
     }
   }, [auth.token])
-
-  useEffect(() => {
-    if (isManager) {
-      setView('manager-menu')
-    }
-  }, [isManager])
 
   const handleLogin = () => {
     clearSignupStatus()
