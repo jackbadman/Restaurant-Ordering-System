@@ -8,6 +8,7 @@ import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
 import Orders from './pages/Orders.jsx'
 import StaffOrders from './pages/StaffOrders.jsx'
+import ManagerMenu from './pages/ManagerMenu.jsx'
 import useAuthForm from './hooks/useAuthForm.js'
 import useMenu from './hooks/useMenu.js'
 import api from './api/axios.js'
@@ -29,8 +30,9 @@ function App() {
     localStorage.removeItem('authToken')
     return { token: null, userId: null, role: null }
   })
-  const { categories, isLoadingMenu, menuError } = useMenu()
+  const { categories, isLoadingMenu, menuError, reloadMenu } = useMenu()
   const isStaff = auth.role === 'staff'
+  const isManager = auth.role === 'manager'
   const {
     handleLoginSubmit,
     handleSignupSubmit,
@@ -47,6 +49,12 @@ function App() {
     }
   }, [auth.token])
 
+  useEffect(() => {
+    if (isManager) {
+      setView('manager-menu')
+    }
+  }, [isManager])
+
   const handleLogin = () => {
     clearSignupStatus()
     setLoginNotice(null)
@@ -57,6 +65,10 @@ function App() {
   const handleBackHome = () => {
     clearSignupStatus()
     setLoginNotice(null)
+    if (isManager) {
+      setView('manager-menu')
+      return
+    }
     setView(isStaff ? 'staff-orders' : 'home')
   }
 
@@ -67,15 +79,24 @@ function App() {
   }
 
   const goToMenu = () => {
+    if (isManager) {
+      setView('manager-menu')
+      return
+    }
     if (isStaff) {
       setView('staff-orders')
       return
     }
+    reloadMenu()
     setActiveCategory(null)
     setView('menu')
   }
 
   const goToOrders = () => {
+    if (isManager) {
+      setView('manager-menu')
+      return
+    }
     if (isStaff) {
       setView('staff-orders')
       return
@@ -104,6 +125,7 @@ function App() {
   }
 
   const openCategory = (categoryId) => {
+    reloadMenu()
     const category = categories.find((cat) => cat.id === categoryId)
     if (category) {
       setActiveCategory(category)
@@ -115,7 +137,7 @@ function App() {
     <div className="page">
       <Header
         onLogin={handleLogin}
-        onOrders={isStaff ? null : goToOrders}
+        onOrders={isStaff || isManager ? null : goToOrders}
         onStaffOrders={auth.role === 'staff' ? goToStaffOrders : null}
         onLogout={handleLogout}
         isLoggedIn={Boolean(auth.token)}
@@ -140,7 +162,7 @@ function App() {
         />
       )}
 
-      {!isStaff && view === 'menu' && (
+      {!isStaff && !isManager && view === 'menu' && (
         <Menu
           categories={categories}
           onSelectCategory={openCategory}
@@ -150,7 +172,7 @@ function App() {
         />
       )}
 
-      {!isStaff && view === 'category' && activeCategory && (
+      {!isStaff && !isManager && view === 'category' && activeCategory && (
         <Category
           category={activeCategory}
           onBackCategories={() => setView('menu')}
@@ -158,15 +180,17 @@ function App() {
         />
       )}
 
-      {!isStaff && view === 'home' && (
+      {!isStaff && !isManager && view === 'home' && (
         <Home onMenu={goToMenu} onOrders={goToOrders} />
       )}
 
-      {!isStaff && view === 'orders' && (
+      {!isStaff && !isManager && view === 'orders' && (
         <Orders onBackHome={handleBackHome} auth={auth} />
       )}
 
-      {isStaff && <StaffOrders onBackHome={handleBackHome} auth={auth} />}
+      {isStaff && !isManager && <StaffOrders onBackHome={handleBackHome} auth={auth} />}
+
+      {isManager && view === 'manager-menu' && <ManagerMenu />}
     </div>
   )
 }

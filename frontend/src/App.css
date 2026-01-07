@@ -519,6 +519,144 @@
   cursor: pointer;
 }
 
+.admin-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-menu__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-menu__panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-menu__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-menu__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.admin-menu__label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.admin-menu__input,
+.admin-menu__select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 15px;
+  background: #ffffff;
+}
+
+.admin-menu__input--area {
+  resize: vertical;
+}
+
+.admin-menu__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.admin-menu__primary {
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: none;
+  background: #111827;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-menu__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.admin-menu__notice {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.admin-menu__notice--success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.admin-menu__notice--error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.admin-menu__list {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-menu__card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #f9fafb;
+  flex-wrap: wrap;
+}
+
+.admin-menu__card h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.admin-menu__meta {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.admin-menu__card-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-menu__danger {
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
 .staff-orders__update:disabled,
 .staff-orders__refresh:disabled {
   opacity: 0.6;

@@ -13,9 +13,6 @@ const menuItemSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
-  imageURL: {
-    type: String
-  },
   categoryId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category",

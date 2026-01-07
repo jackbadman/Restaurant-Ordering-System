@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import api from '../api/axios.js'
 import defaultCategoryImage from '../assets/KebabHome.svg'
 import shishImage from '../assets/shish_mixed.svg'
@@ -27,69 +27,66 @@ export default function useMenu() {
   const [isLoadingMenu, setIsLoadingMenu] = useState(false)
   const [menuError, setMenuError] = useState('')
 
-  useEffect(() => {
-    const loadMenu = async () => {
-      setIsLoadingMenu(true)
-      setMenuError('')
-      try {
-        const [categoriesResponse, itemsResponse] = await Promise.all([
-          api.get('/api/categories'),
-          api.get('/api/menuitems'),
-        ])
-        const categoryData = Array.isArray(categoriesResponse.data)
-          ? categoriesResponse.data
-          : []
-        const itemData = Array.isArray(itemsResponse.data) ? itemsResponse.data : []
+  const loadMenu = useCallback(async () => {
+    setIsLoadingMenu(true)
+    setMenuError('')
+    try {
+      const [categoriesResponse, itemsResponse] = await Promise.all([
+        api.get('/api/categories'),
+        api.get('/api/menuitems'),
+      ])
+      const categoryData = Array.isArray(categoriesResponse.data)
+        ? categoriesResponse.data
+        : []
+      const itemData = Array.isArray(itemsResponse.data) ? itemsResponse.data : []
 
-        const itemsByCategoryId = new Map()
-        itemData.forEach((item) => {
-          const rawCategory = item.categoryId
-          const categoryId =
-            typeof rawCategory === 'string' ? rawCategory : rawCategory?._id
-          if (!categoryId) {
-            return
-          }
-          if (!itemsByCategoryId.has(categoryId)) {
-            itemsByCategoryId.set(categoryId, [])
-          }
-          itemsByCategoryId.get(categoryId).push(item)
-        })
+      const itemsByCategoryId = new Map()
+      itemData.forEach((item) => {
+        const rawCategory = item.categoryId
+        const categoryId = typeof rawCategory === 'string' ? rawCategory : rawCategory?._id
+        if (!categoryId) {
+          return
+        }
+        if (!itemsByCategoryId.has(categoryId)) {
+          itemsByCategoryId.set(categoryId, [])
+        }
+        itemsByCategoryId.get(categoryId).push(item)
+      })
 
-        const hydratedCategories = categoryData.map((category) => {
-          const categoryId = category._id || category.id
-          const itemsForCategory = itemsByCategoryId.get(categoryId) || []
-          const categoryKey = (category.slug || category.name || '').trim().toLowerCase()
-          const coverImage =
-            category.imageURL ||
-            category.image ||
-            categoryImages[categoryKey] ||
-            itemsForCategory.find((item) => item.imageURL)?.imageURL ||
-            defaultCategoryImage
+      const hydratedCategories = categoryData.map((category) => {
+        const categoryId = category._id || category.id
+        const itemsForCategory = itemsByCategoryId.get(categoryId) || []
+        const categoryKey = (category.slug || category.name || '').trim().toLowerCase()
+        const coverImage =
+          category.imageURL ||
+          category.image ||
+          categoryImages[categoryKey] ||
+          defaultCategoryImage
 
-          return {
-            id: categoryId,
-            name: category.name,
-            description: category.description || '',
-            image: coverImage,
-            items: itemsForCategory.map((item) => ({
-              name: item.name,
-              description: item.description || '',
-              price: item.price,
-              imageURL: item.imageURL || '',
-            })),
-          }
-        })
+        return {
+          id: categoryId,
+          name: category.name,
+          description: category.description || '',
+          image: coverImage,
+          items: itemsForCategory.map((item) => ({
+            name: item.name,
+            description: item.description || '',
+            price: item.price,
+          })),
+        }
+      })
 
-        setCategories(hydratedCategories)
-      } catch {
-        setMenuError('Unable to load the menu right now. Please try again soon.')
-      } finally {
-        setIsLoadingMenu(false)
-      }
+      setCategories(hydratedCategories)
+    } catch {
+      setMenuError('Unable to load the menu right now. Please try again soon.')
+    } finally {
+      setIsLoadingMenu(false)
     }
-
-    loadMenu()
   }, [])
 
-  return { categories, isLoadingMenu, menuError }
+  useEffect(() => {
+    loadMenu()
+  }, [loadMenu])
+
+  return { categories, isLoadingMenu, menuError, reloadMenu: loadMenu }
 }
