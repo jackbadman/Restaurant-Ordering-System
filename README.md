@@ -1,5 +1,5 @@
 # Restaurant Ordering System
-
+This is the Assignment 2 contribution of **Jack Goodman**, student number: **10840982**.
 ## Project Overview
 
 This project is a full-stack restaurant ordering system developed as part of the COMP3006 – Full Stack Development module. The system supports remote food ordering, real-time order updates, and role-based workflows for customers, staff, and management.
