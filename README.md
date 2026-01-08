@@ -81,6 +81,3 @@ Key lessons from this project include:
 - The effectiveness of integration testing for validating real-world behaviour
 - The need to balance feature scope with reliability and test coverage
 
-## Running the Project
-
-Setup and execution instructions can be added here if required (for example environment variables, MongoDB connection details, and startup commands).
