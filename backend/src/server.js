@@ -1,3 +1,4 @@
+// App entry point: configure Express, routes, and Socket.io.
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";

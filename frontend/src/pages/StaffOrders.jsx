@@ -1,3 +1,4 @@
+// Staff dashboard to view/update orders.
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import api from '../api/axios.js'
 import { socket } from '../utils/socket.js'

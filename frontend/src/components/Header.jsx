@@ -1,3 +1,4 @@
+// App header with auth/navigation actions.
 import logo from '../assets/logo.svg'
 
 function Header({ onLogin, onOrders, onStaffOrders, onLogout, isLoggedIn, isStaff }) {

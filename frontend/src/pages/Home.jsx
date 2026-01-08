@@ -1,3 +1,4 @@
+// Landing page.
 import homeImage from '../assets/KebabHome1.svg'
 
 function Home({ onMenu, onOrders }) {

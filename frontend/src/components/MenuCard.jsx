@@ -1,3 +1,4 @@
+// Category card used on the menu page.
 function MenuCard({ category, onSelect }) {
   return (
     <article

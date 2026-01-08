@@ -1,3 +1,4 @@
+// Manage login/signup flows and state.
 import { useState } from 'react'
 import api from '../api/axios.js'
 import { decodeJwt } from '../utils/decodeJwt.js'

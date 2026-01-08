@@ -1,3 +1,4 @@
+// Shared auth form layout for login/signup.
 function AuthForm({
   title,
   eyebrow,

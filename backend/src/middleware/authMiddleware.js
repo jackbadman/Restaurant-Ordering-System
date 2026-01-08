@@ -1,3 +1,4 @@
+// Auth/role guards for protected routes.
 import jwt from "jsonwebtoken";
 
 export const requireAuth = (req, res, next) => {

@@ -1,3 +1,4 @@
+// Decode JWT payload for client-side auth.
 export function decodeJwt(token) {
   if (!token || typeof token !== 'string') return null
   try {

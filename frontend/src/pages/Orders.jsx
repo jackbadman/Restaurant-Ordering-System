@@ -1,3 +1,4 @@
+// Customer orders view and create flow.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import api from '../api/axios.js'
 import { socket } from '../utils/socket.js'

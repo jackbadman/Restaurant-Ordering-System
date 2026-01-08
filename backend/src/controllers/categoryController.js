@@ -1,3 +1,4 @@
+// CRUD handlers for menu categories.
 import Category from "../models/Category.js";
 
 export const createCategory = async (req, res) => {

@@ -1,3 +1,4 @@
+// Order routes with auth/role guards.
 import express from "express";
 import {
   createOrder,

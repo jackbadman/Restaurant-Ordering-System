@@ -1,3 +1,4 @@
+// Menu category list page.
 import MenuCard from '../components/MenuCard.jsx'
 
 function Menu({ categories, onSelectCategory, onBackHome, isLoading, error }) {

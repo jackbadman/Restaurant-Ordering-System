@@ -1,3 +1,4 @@
+// Menu item display row.
 function MenuItem({ item }) {
   return (
     <div className="menu-item">

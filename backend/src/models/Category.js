@@ -1,3 +1,4 @@
+// Category schema and model.
 import mongoose from "mongoose";
 
 const categorySchema = new mongoose.Schema({

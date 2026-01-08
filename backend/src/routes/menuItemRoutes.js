@@ -1,3 +1,4 @@
+// Menu item routes with auth/role guards.
 import express from "express";
 import {
   createMenuItem,

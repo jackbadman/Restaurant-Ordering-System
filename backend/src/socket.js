@@ -1,3 +1,4 @@
+// Socket.io singleton for realtime updates.
 import { Server } from "socket.io";
 
 let io;

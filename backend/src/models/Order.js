@@ -1,3 +1,4 @@
+// Order schema and updatedAt hook.
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({

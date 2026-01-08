@@ -1,3 +1,4 @@
+// Login page wiring to AuthForm.
 import AuthForm from '../components/AuthForm.jsx'
 
 function Login({ onSubmit, onSignup, onBack, notice }) {

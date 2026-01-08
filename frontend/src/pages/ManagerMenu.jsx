@@ -1,3 +1,4 @@
+// Manager UI to CRUD menu items.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import api from '../api/axios.js'
 

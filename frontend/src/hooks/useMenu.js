@@ -1,3 +1,4 @@
+// Fetch and shape categories/menu items for UI.
 import { useCallback, useEffect, useState } from 'react'
 import api from '../api/axios.js'
 import defaultCategoryImage from '../assets/KebabHome.svg'

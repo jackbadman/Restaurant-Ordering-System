@@ -1,3 +1,4 @@
+// Signup page wiring to AuthForm.
 import AuthForm from '../components/AuthForm.jsx'
 
 function Signup({ onSubmit, onBackLogin, onBackHome, notice }) {

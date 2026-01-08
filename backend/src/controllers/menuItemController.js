@@ -1,3 +1,4 @@
+// CRUD handlers for menu items.
 import MenuItem from "../models/MenuItem.js";
 
 export const createMenuItem = async (req, res) => {

@@ -1,3 +1,4 @@
+// Category detail page showing items.
 import MenuItem from '../components/MenuItem.jsx'
 
 function Category({ category, onBackCategories, onBackHome }) {

@@ -1,3 +1,4 @@
+// Shared Socket.io client instance.
 import { io } from 'socket.io-client'
 
 const SOCKET_URL = 'http://localhost:5001'

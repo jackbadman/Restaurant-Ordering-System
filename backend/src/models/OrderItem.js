@@ -1,3 +1,4 @@
+// Order item schema and model.
 import mongoose from "mongoose";
 
 const orderItemSchema = new mongoose.Schema({
